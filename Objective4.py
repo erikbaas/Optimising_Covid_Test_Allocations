@@ -28,13 +28,13 @@ import numpy as np
 alpha = 0.5 #weight factor
 fixedcharge = 1000 #fixed charge to open up TL_j
 testcost = 100 #cost per testkit/employee
-minopen = 10
+minopen = 10 #min number of testees to open up a location
 #sets to determine ranges
-Testlocations = ['TL1','TL2','TL3']
+Testlocations = ['Arnhem','Assen','Den Bosch', 'Den Haag', 'Groningen', 'Haarlem', 'Leeuwarden', 'Lelystad', 'Maastricht', 'Middelburg', 'Utrecht', 'Zwolle' ]
 testlocations = range(len(Testlocations))
-Livinglocations = ['LL1','LL2','LL3']
+Livinglocations = ['Arnhem','Assen','Den Bosch', 'Den Haag', 'Groningen', 'Haarlem', 'Leeuwarden', 'Lelystad', 'Maastricht', 'Middelburg', 'Utrecht', 'Zwolle' ]
 livinglocations = range(len(Livinglocations))
-Timeslots = ['TS1','TS2','TS3']
+Timeslots = ['Monday','Tuesday','Wednesday', 'Thursday', 'Friday']
 timeslots = range(len(Timeslots))
 
 #distance data from location to location
@@ -60,7 +60,16 @@ alltesteesloc = alltestees[:,0]
 livloc1 = np.count_nonzero(alltesteesloc==1)
 livloc2 = np.count_nonzero(alltesteesloc==2)
 livloc3 = np.count_nonzero(alltesteesloc==3)
-testees = [livloc1,livloc2,livloc3] #testees at loc i total
+livloc4 = np.count_nonzero(alltesteesloc==4)
+livloc5 = np.count_nonzero(alltesteesloc==5)
+livloc6 = np.count_nonzero(alltesteesloc==6)
+livloc7 = np.count_nonzero(alltesteesloc==7)
+livloc8 = np.count_nonzero(alltesteesloc==8)
+livloc9 = np.count_nonzero(alltesteesloc==9)
+livloc10 = np.count_nonzero(alltesteesloc==10)
+livloc11 = np.count_nonzero(alltesteesloc==11)
+livloc12 = np.count_nonzero(alltesteesloc==12)
+testees = [livloc1,livloc2,livloc3,livloc4,livloc5,livloc6,livloc7,livloc8,livloc9,livloc10,livloc11,livloc12] #testees at loc i total
 
 # total number of testees:
 Ttot = len(alltestees)
@@ -71,12 +80,59 @@ alltesteestime = alltestees[:,1]
 liv1tim1=0
 liv1tim2=0
 liv1tim3=0
+liv1tim4=0
+liv1tim5=0
 liv2tim1=0
 liv2tim2=0
 liv2tim3=0
+liv2tim4=0
+liv2tim5=0
 liv3tim1=0
 liv3tim2=0
 liv3tim3=0
+liv3tim4=0
+liv3tim5=0
+liv4tim1=0
+liv4tim2=0
+liv4tim3=0
+liv4tim4=0
+liv4tim5=0
+liv5tim1=0
+liv5tim2=0
+liv6tim3=0
+liv6tim4=0
+liv6tim5=0
+liv7tim1=0
+liv7tim2=0
+liv7tim3=0
+liv7tim4=0
+liv7tim5=0
+liv8tim1=0
+liv8tim2=0
+liv8tim3=0
+liv8tim4=0
+liv8tim5=0
+liv9tim1=0
+liv9tim2=0
+liv9tim3=0
+liv9tim4=0
+liv9tim5=0
+liv10tim1=0
+liv10tim2=0
+liv10tim3=0
+liv10tim4=0
+liv10tim5=0
+liv11tim1=0
+liv11tim2=0
+liv11tim3=0
+liv11tim4=0
+liv11tim5=0
+liv12tim1=0
+liv12tim2=0
+liv12tim3=0
+liv12tim4=0
+liv12tim5=0
+
 for a in range(len(alltestees)):
     if alltesteestime[a] and alltesteesloc[a] ==1:
         liv1tim1+=1
@@ -84,29 +140,150 @@ for a in range(len(alltestees)):
         liv1tim2+=1
     elif alltesteestime[a] ==3 and alltesteesloc[a] ==1:
         liv1tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==1:
+        liv1tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==1:
+        liv1tim5+=1
     elif alltesteestime[a] ==1 and alltesteesloc[a] ==2:
         liv2tim1+=1
     elif alltesteestime[a] and alltesteesloc[a] ==2:
         liv2tim2+=1
     elif alltesteestime[a] ==3 and alltesteesloc[a] ==2:
         liv2tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==2:
+        liv2tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==2:
+        liv2tim5+=1
     elif alltesteestime[a] ==1 and alltesteesloc[a] ==3:
         liv3tim1+=1
     elif alltesteestime[a] ==2 and alltesteesloc[a] ==3:
         liv3tim2+=1
     elif alltesteestime[a] and alltesteesloc[a] ==3:
         liv3tim3+=1
-livtimepref= [[liv1tim1,liv1tim2,liv1tim3,0],
-             [liv2tim1,liv2tim2,liv2tim3,0],
-             [liv3tim1,liv3tim2,liv3tim3,0]]
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==3:
+        liv3tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==3:
+        liv3tim5+=1
+    if alltesteestime[a] ==1 and alltesteesloc[a] ==4:
+        liv4tim1+=1
+    elif alltesteestime[a] ==2 and alltesteesloc[a] ==4:
+        liv4tim2+=1
+    elif alltesteestime[a] ==3 and alltesteesloc[a] ==4:
+        liv4tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==4:
+        liv4tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==4:
+        liv4tim5+=1
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==5:
+        liv5tim1+=1
+    elif alltesteestime[a] ==2 and alltesteesloc[a] ==5:
+        liv5tim2+=1
+    elif alltesteestime[a] ==3 and alltesteesloc[a] ==5:
+        liv5tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==5:
+        liv5tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==5:
+        liv5tim5+=1
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==6:
+        liv6tim1+=1
+    elif alltesteestime[a] ==2 and alltesteesloc[a] ==6:
+        liv6tim2+=1
+    elif alltesteestime[a] and alltesteesloc[a] ==6:
+        liv6tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==6:
+        liv6tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==6:
+        liv6tim5+=1
+    if alltesteestime[a] and alltesteesloc[a] ==7:
+        liv7tim1+=1
+    elif alltesteestime[a] ==2 and alltesteesloc[a] ==7:
+        liv7tim2+=1
+    elif alltesteestime[a] ==3 and alltesteesloc[a] ==7:
+        liv7tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==7:
+        liv7tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==7:
+        liv7tim5+=1
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==8:
+        liv8tim1+=1
+    elif alltesteestime[a] and alltesteesloc[a] ==8:
+        liv8tim2+=1
+    elif alltesteestime[a] ==3 and alltesteesloc[a] ==8:
+        liv8tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==8:
+        liv8tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==8:
+        liv8tim5+=1
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==9:
+        liv9tim1+=1
+    elif alltesteestime[a] ==2 and alltesteesloc[a] ==9:
+        liv9tim2+=1
+    elif alltesteestime[a] ==3and alltesteesloc[a] ==9:
+        liv9tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==9:
+        liv9tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==9:
+        liv9tim5+=1
+    if alltesteestime[a] ==1 and alltesteesloc[a] ==10:
+        liv10tim1+=1
+    elif alltesteestime[a] ==2 and alltesteesloc[a] ==10:
+        liv10tim2+=1
+    elif alltesteestime[a] ==3 and alltesteesloc[a] ==10:
+        liv10tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==10:
+        liv10tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==10:
+        liv10tim5+=1
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==11:
+        liv11tim1+=1
+    elif alltesteestime[a] ==2 and alltesteesloc[a] ==11:
+        liv11tim2+=1
+    elif alltesteestime[a] ==3 and alltesteesloc[a] ==11:
+        liv11tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==11:
+        liv11tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==11:
+        liv11tim5+=1
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==12:
+        liv12tim1+=1
+    elif alltesteestime[a] ==2 and alltesteesloc[a] ==12:
+        liv12tim2+=1
+    elif alltesteestime[a] ==3and alltesteesloc[a] ==12:
+        liv12tim3+=1
+    elif alltesteestime[a] ==4 and alltesteesloc[a] ==12:
+        liv12tim4+=1
+    elif alltesteestime[a] ==5 and alltesteesloc[a] ==12:
+        liv12tim5+=1
+
+livtimepref= [[liv1tim1,liv1tim2,liv1tim3,liv1tim4,liv1tim5,0],
+             [liv2tim1,liv2tim2,liv2tim3,liv2tim4,liv2tim5,0],
+             [liv3tim1,liv3tim2,liv3tim3,liv3tim4,liv3tim5,0],
+             [liv4tim1,liv4tim2,liv4tim3,liv4tim4,liv4tim5,0],
+             [liv5tim1,liv5tim2,liv5tim3,liv5tim4,liv5tim5,0],
+             [liv6tim1,liv6tim2,liv6tim3,liv6tim4,liv6tim5,0],
+             [liv7tim1,liv7tim2,liv7tim3,liv7tim4,liv7tim5,0],
+             [liv8tim1,liv8tim2,liv8tim3,liv8tim4,liv8tim5,0],
+             [liv9tim1,liv9tim2,liv9tim3,liv9tim4,liv9tim5,0],
+             [liv10tim1,liv10tim2,liv10tim3,liv10tim4,liv10tim5,0],
+             [liv11tim1,liv11tim2,liv11tim3,liv11tim4,liv11tim5,0],
+             [liv12tim1,liv12tim2,liv12tim3,liv12tim4,liv12tim5,0]
 livtim=[]
-print(livtimepref)
+#print(livtimepref)
 
 # location capacities
-loccapt = [[15, 40, 10],
-           [30, 10, 0],
-           [30, 40, 0]] # test location capacity per time slot t
-loccap = [90,80,0] # test location capacity total
+loccapt = [[15, 40, 10,0,0],
+           [30, 10, 0,0,0],
+           [30, 40, 0,0,0],
+           [10,0,0,0,0],
+           [0,10,20,30,10],
+           [15, 40, 10, 0, 0],
+           [30, 10, 0, 0, 0],
+           [30, 40, 0, 0, 0],
+           [10, 0, 0, 0, 0],
+           [0, 10, 20, 30, 10],
+           [10, 0, 0, 0, 0],
+           [0, 10, 20, 30, 10]] # test location capacity per time slot t
+loccap = [90,80,0,0,0] # test location capacity total
 
 # big number M needed for penalty and fixed charge constraint
 M=10000
