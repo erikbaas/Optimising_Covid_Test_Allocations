@@ -53,7 +53,7 @@ alltestees = df_testees.to_numpy()
 df_distances= pd.read_excel(workbook, 'distancetable')
 distance = df_distances.to_numpy()
 #print(alltestees)
-#print(distances)
+#print(distance)
 
 #get all testees per day
 alltesteesloc = alltestees[:,0]
@@ -279,7 +279,7 @@ livtim=[]
 loccapt = [[15, 40, 10, 0, 0],
            [30, 10, 0, 0, 0],
            [30, 40, 0, 0, 0],
-           [10, 0, 0, 0 ,0],
+           [10, 0, 0, 0,0],
            [0, 10, 20, 30, 10],
            [15, 40, 10, 0, 0],
            [30, 10, 0, 0, 0],
@@ -320,29 +320,29 @@ m.setObjective(m.getObjective(), GRB.MINIMIZE)  # The objective is to minimize t
 
 for j in testlocations:
     # k2 number of testees travelling from i to j = smaller or equal to capacity of j
-    m.addConstr(quicksum(x[i,j,t] for i in livinglocations for t in timeslots), GRB.LESS_EQUAL, loccap[j])
+    m.addConstr(quicksum(x[i,j,t] for i in livinglocations for t in timeslots), GRB.LESS_EQUAL, loccap[j],"testlocation capacity")
     # k3 number of people needed to open up testloc
-    m.addConstr((quicksum(x[i,j,t] for i in livinglocations for t in timeslots) - M * y[j]), GRB.LESS_EQUAL, minopen)
+    m.addConstr((quicksum(x[i,j,t] for i in livinglocations for t in timeslots) - M * y[j]), GRB.LESS_EQUAL, minopen,"minimum people to open")
     for t in timeslots:
         # k1 number of testees per timeslot
-        m.addConstr(quicksum(x[i,j,t] for i in livinglocations), GRB.LESS_EQUAL, loccapt[j][t])
+        m.addConstr(quicksum(x[i,j,t] for i in livinglocations), GRB.LESS_EQUAL, loccapt[j][t],"teslocation timeslot capacity")
     for i in livinglocations:
         # k6 soft constraint
-        m.addConstr( -M*b[i,j] + distance[i][j] * quicksum(x[i,j,t] for t in timeslots), GRB.LESS_EQUAL, 10 * quicksum(x[i,j,t] for t in timeslots))
+        m.addConstr( -M*b[i,j] + distance[i][j] * quicksum(x[i,j,t] for t in timeslots), GRB.LESS_EQUAL, 10 * quicksum(x[i,j,t] for t in timeslots),"soft distance constraint")
 #k4 people wait max so long
 for t in timeslots:
     for i in livinglocations:
         # make sure they can only be added to their time slot or the one after
-        m.addConstr(quicksum(x[i, j, t] for j in testlocations), GRB.LESS_EQUAL, livtimepref[i][t] + livtimepref[i][t - 1])
+        m.addConstr(quicksum(x[i, j, t] for j in testlocations), GRB.LESS_EQUAL, livtimepref[i][t] + livtimepref[i][t - 1],"part 1 timeslots: only 1 slot delay")
         #add penalty for non preferred time slot
-        m.addConstr(quicksum(x[i,j,t] for j in testlocations), GRB.GREATER_EQUAL, livtimepref[i][t] - z[i,t]*(livtimepref[i][t]-quicksum(x[i,j,t] for j in testlocations)))
+        m.addConstr(quicksum(x[i,j,t] for j in testlocations), GRB.GREATER_EQUAL, livtimepref[i][t] - z[i,t]*(livtimepref[i][t]-quicksum(x[i,j,t] for j in testlocations)),"part 2 timeslots: penalty for delay")
 
 #sum of all people with symptoms must equal all people that get tested
 #m.addConstr(quicksum(x[i,j,t] for i in livinglocations for j in testlocations for t in timeslots), GRB.EQUAL, Ttot)
 #sum of all people from i that get tested must equal sum of all people in i
 for i in livinglocations:
     xtot.append(quicksum(x[i,j,t] for j in testlocations for t in timeslots))
-    m.addConstr(xtot[i], GRB.EQUAL, testees[i])
+    m.addConstr(xtot[i], GRB.EQUAL, testees[i],"all testees get tested")
 
 m.update()
 # ==========================================================
