@@ -283,7 +283,7 @@ loccapt = [[15, 40, 10,0,0],
            [0, 10, 20, 30, 10],
            [10, 0, 0, 0, 0],
            [0, 10, 20, 30, 10]] # test location capacity per time slot t
-loccap = [90,80,0,0,0] # test location capacity total
+loccap = [90,80,0,0,0,0,0,0,0,0,0,0] # test location capacity total
 
 # big number M needed for penalty and fixed charge constraint
 M=10000
