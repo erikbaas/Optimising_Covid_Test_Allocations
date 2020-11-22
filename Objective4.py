@@ -26,9 +26,9 @@ import numpy as np
 # Data
 # =========================================================
 alpha = 0.5 #weight factor
-fixedcharge = 50 #fixed charge to open up TL_i
-testcost = 10 #cost per testkit/employee
-
+fixedcharge = 1000 #fixed charge to open up TL_j
+testcost = 100 #cost per testkit/employee
+minopen = 10
 #sets to determine ranges
 Testlocations = ['TL1','TL2','TL3']
 testlocations = range(len(Testlocations))
@@ -38,9 +38,9 @@ Timeslots = ['TS1','TS2','TS3']
 timeslots = range(len(Timeslots))
 
 #distance data from location to location
-distance1 = [[0, 20, 50], #travel cost from i to j and back c1
-            [20, 0, 20],
-            [20, 50, 0]]
+#distance1 = [[0, 20, 50], #travel cost from i to j and back c1
+ #           [20, 0, 20],
+ #           [20, 50, 0]]
 
 # =========================================================
 # Reading worksheets from xlsx file
@@ -53,6 +53,7 @@ alltestees = df_testees.to_numpy()
 df_distances= pd.read_excel(workbook, 'distancetable')
 distance = df_distances.to_numpy()
 #print(alltestees)
+#print(distances)
 
 #get all testees per day
 alltesteesloc = alltestees[:,0]
@@ -139,7 +140,7 @@ for j in testlocations:
     # k2 number of testees travelling from i to j = smaller or equal to capacity of j
     m.addConstr(quicksum(x[i,j,t] for i in livinglocations for t in timeslots), GRB.LESS_EQUAL, loccap[j])
     # k3 number of people needed to open up testloc
-    m.addConstr((quicksum(x[i,j,t] for i in livinglocations for t in timeslots) - M * y[j]), GRB.LESS_EQUAL, fixedcharge)
+    m.addConstr((quicksum(x[i,j,t] for i in livinglocations for t in timeslots) - M * y[j]), GRB.LESS_EQUAL, minopen)
     for t in timeslots:
         # k1 number of testees per timeslot
         m.addConstr(quicksum(x[i,j,t] for i in livinglocations), GRB.LESS_EQUAL, loccapt[j][t])
@@ -149,7 +150,7 @@ for j in testlocations:
 #k4 people wait max so long
 for t in timeslots:
     for i in livinglocations:
-        # make sure they can only be added to their time slot
+        # make sure they can only be added to their time slot or the one after
         m.addConstr(quicksum(x[i, j, t] for j in testlocations), GRB.LESS_EQUAL, livtimepref[i][t] + livtimepref[i][t - 1])
         #add penalty for non preferred time slot
         m.addConstr(quicksum(x[i,j,t] for j in testlocations), GRB.GREATER_EQUAL, livtimepref[i][t] - z[i,t]*(livtimepref[i][t]-quicksum(x[i,j,t] for j in testlocations)))
