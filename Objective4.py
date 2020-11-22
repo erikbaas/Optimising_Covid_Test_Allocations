@@ -5,11 +5,11 @@
 # =========================================================
 #Minimise the distance traveled by people going to a Covid test facility (weight $\alpha$: 0.6)
 #Minimise the cost for the test- locations in the Netherlands (weight $1-\alpha$: 0.4)
-#min  Z = \alpha Z_{1} + (1-\alpha)Z_{2}
+# min  Z = \alpha Z_{1} + (1-\alpha)Z_{2}
 # $Z_{1}$ = Minimisation of the travelling distance (km)
 # Z_{1} = \sum_{i=1}^{n}\sum_{j=1}^{m} c_{ij}x_{ij} + 1000\sum_{i=1}^n\sum_{j=1}^{m}b_{i,j}
-#Z_{2}$ = Minimisation of the fixed charge cost per opening test facility and the variable cost regarding needed testkits/employees
-#Z_{2} = c_{3}\sum_{j=1}^{n}x_{ij} +c_4\sum_{j=1}^{n}y_j
+# Z_{2}$ = Minimisation of the fixed charge cost per opening test facility and the variable cost regarding needed testkits/employees
+# Z_{2} = c_{3}\sum_{j=1}^{n}x_{ij} +c_4\sum_{j=1}^{n}y_j
 
 # =========================================================
 # Importing packages
@@ -99,6 +99,11 @@ liv4tim4=0
 liv4tim5=0
 liv5tim1=0
 liv5tim2=0
+liv5tim3=0
+liv5tim4=0
+liv5tim5=0
+liv6tim1=0
+liv6tim2=0
 liv6tim3=0
 liv6tim4=0
 liv6tim5=0
@@ -164,7 +169,7 @@ for a in range(len(alltestees)):
         liv3tim4+=1
     elif alltesteestime[a] ==5 and alltesteesloc[a] ==3:
         liv3tim5+=1
-    if alltesteestime[a] ==1 and alltesteesloc[a] ==4:
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==4:
         liv4tim1+=1
     elif alltesteestime[a] ==2 and alltesteesloc[a] ==4:
         liv4tim2+=1
@@ -188,13 +193,13 @@ for a in range(len(alltestees)):
         liv6tim1+=1
     elif alltesteestime[a] ==2 and alltesteesloc[a] ==6:
         liv6tim2+=1
-    elif alltesteestime[a] and alltesteesloc[a] ==6:
+    elif alltesteestime[a] ==3 and alltesteesloc[a] ==6:
         liv6tim3+=1
     elif alltesteestime[a] ==4 and alltesteesloc[a] ==6:
         liv6tim4+=1
     elif alltesteestime[a] ==5 and alltesteesloc[a] ==6:
         liv6tim5+=1
-    if alltesteestime[a] and alltesteesloc[a] ==7:
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==7:
         liv7tim1+=1
     elif alltesteestime[a] ==2 and alltesteesloc[a] ==7:
         liv7tim2+=1
@@ -206,7 +211,7 @@ for a in range(len(alltestees)):
         liv7tim5+=1
     elif alltesteestime[a] ==1 and alltesteesloc[a] ==8:
         liv8tim1+=1
-    elif alltesteestime[a] and alltesteesloc[a] ==8:
+    elif alltesteestime[a] ==2and alltesteesloc[a] ==8:
         liv8tim2+=1
     elif alltesteestime[a] ==3 and alltesteesloc[a] ==8:
         liv8tim3+=1
@@ -218,13 +223,13 @@ for a in range(len(alltestees)):
         liv9tim1+=1
     elif alltesteestime[a] ==2 and alltesteesloc[a] ==9:
         liv9tim2+=1
-    elif alltesteestime[a] ==3and alltesteesloc[a] ==9:
+    elif alltesteestime[a] ==3 and alltesteesloc[a] ==9:
         liv9tim3+=1
     elif alltesteestime[a] ==4 and alltesteesloc[a] ==9:
         liv9tim4+=1
     elif alltesteestime[a] ==5 and alltesteesloc[a] ==9:
         liv9tim5+=1
-    if alltesteestime[a] ==1 and alltesteesloc[a] ==10:
+    elif alltesteestime[a] ==1 and alltesteesloc[a] ==10:
         liv10tim1+=1
     elif alltesteestime[a] ==2 and alltesteesloc[a] ==10:
         liv10tim2+=1
@@ -266,16 +271,16 @@ livtimepref= [[liv1tim1,liv1tim2,liv1tim3,liv1tim4,liv1tim5,0],
              [liv9tim1,liv9tim2,liv9tim3,liv9tim4,liv9tim5,0],
              [liv10tim1,liv10tim2,liv10tim3,liv10tim4,liv10tim5,0],
              [liv11tim1,liv11tim2,liv11tim3,liv11tim4,liv11tim5,0],
-             [liv12tim1,liv12tim2,liv12tim3,liv12tim4,liv12tim5,0]
+             [liv12tim1,liv12tim2,liv12tim3,liv12tim4,liv12tim5,0]]
 livtim=[]
 #print(livtimepref)
 
 # location capacities
-loccapt = [[15, 40, 10,0,0],
-           [30, 10, 0,0,0],
-           [30, 40, 0,0,0],
-           [10,0,0,0,0],
-           [0,10,20,30,10],
+loccapt = [[15, 40, 10, 0, 0],
+           [30, 10, 0, 0, 0],
+           [30, 40, 0, 0, 0],
+           [10, 0, 0, 0 ,0],
+           [0, 10, 20, 30, 10],
            [15, 40, 10, 0, 0],
            [30, 10, 0, 0, 0],
            [30, 40, 0, 0, 0],
@@ -297,7 +302,7 @@ m = Model('objective1')
 x = {} #number of testees travelling from i to j during t
 b = {} #binary penalty travel distance
 y = {} #binary fixed charge cost
-z={} #penalty for late test
+z = {} #penalty for late test
 
 for j in testlocations:
     y[j] = m.addVar(obj=+(1-alpha)*fixedcharge, lb=0,vtype=GRB.BINARY) #binary fixed charge cost
@@ -374,5 +379,5 @@ print ("Objective Function =", m.ObjVal/1.0)
 for i in livinglocations:
     for j in testlocations:
         for t in timeslots:
-            print( x[i,j,t].X, "people from livinglocation", Livinglocations[i], "go to testlocation", Testlocations[j], "during timeslot", Timeslots[t])
+            print( x[i,j,t].X, "people living in", Livinglocations[i], "go to a test location in", Testlocations[j], "on", Timeslots[t], "to get tested")
 
