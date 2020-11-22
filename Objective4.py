@@ -38,7 +38,7 @@ Timeslots = ['TS1','TS2','TS3']
 timeslots = range(len(Timeslots))
 
 #distance data from location to location
-distance = [[0, 20, 50], #travel cost from i to j and back c1
+distance1 = [[0, 20, 50], #travel cost from i to j and back c1
             [20, 0, 20],
             [20, 50, 0]]
 
@@ -46,11 +46,12 @@ distance = [[0, 20, 50], #travel cost from i to j and back c1
 # Reading worksheets from xlsx file
 # =========================================================
 workbook = pd.ExcelFile("testees.xlsx")
-df_testees = pd.read_excel(workbook, 'Sheet1')
+df_testees = pd.read_excel(workbook, 'RandomPopulation')
 df_livloc = pd.DataFrame(df_testees, columns= ['livloc'])
 df_timepref = pd.DataFrame(df_testees, columns= ['timepref'])
 alltestees = df_testees.to_numpy()
-
+df_distances= pd.read_excel(workbook, 'distancetable')
+distance = df_distances.to_numpy()
 #print(alltestees)
 
 #get all testees per day
@@ -101,8 +102,8 @@ livtim=[]
 print(livtimepref)
 
 # location capacities
-loccapt = [[10, 40, 0],
-           [30, 40, 0],
+loccapt = [[15, 40, 10],
+           [30, 10, 0],
            [30, 40, 0]] # test location capacity per time slot t
 loccap = [90,80,0] # test location capacity total
 
@@ -118,6 +119,7 @@ m = Model('objective1')
 x = {} #number of testees travelling from i to j during t
 b = {} #binary penalty travel distance
 y = {} #binary fixed charge cost
+z={} #penalty for late test
 
 for j in testlocations:
     y[j] = m.addVar(obj=+(1-alpha)*fixedcharge, lb=0,vtype=GRB.BINARY) #binary fixed charge cost
@@ -125,9 +127,12 @@ for j in testlocations:
         b[i,j] = m.addVar(obj=+alpha*1000, lb=0,vtype=GRB.BINARY)  # plus penalty cost
         for t in timeslots:
             x[i,j,t] = m.addVar(obj = (+alpha*distance[i][j]+(1-alpha)*testcost),lb=0,vtype=GRB.INTEGER) # distance x x_ij
+for i in livinglocations:
+    for t in timeslots:
+        z[i,t] = m.addVar(obj=+ 10, lb=0, vtype=GRB.BINARY)  # penalty for late test
 
 m.update()
-m.setObjective(m.getObjective(), GRB.MINIMIZE)  # The objective is to minimize travel distance
+m.setObjective(m.getObjective(), GRB.MINIMIZE)  # The objective is to minimize travel distance+ delay + facility cost
 
 
 for j in testlocations:
@@ -144,11 +149,13 @@ for j in testlocations:
 #k4 people wait max so long
 for t in timeslots:
     for i in livinglocations:
-        #livtim.append(quicksum(x[i, j, t] for j in testlocations) +quicksum(x[i,j,t+1] for j in testlocations))
-        m.addConstr(quicksum(x[i,j,t] for j in testlocations), GRB.LESS_EQUAL, livtimepref[i][t] + livtimepref[i][t-1])
-#
+        # make sure they can only be added to their time slot
+        m.addConstr(quicksum(x[i, j, t] for j in testlocations), GRB.LESS_EQUAL, livtimepref[i][t] + livtimepref[i][t - 1])
+        #add penalty for non preferred time slot
+        m.addConstr(quicksum(x[i,j,t] for j in testlocations), GRB.GREATER_EQUAL, livtimepref[i][t] - z[i,t]*(livtimepref[i][t]-quicksum(x[i,j,t] for j in testlocations)))
+
 #sum of all people with symptoms must equal all people that get tested
-m.addConstr(quicksum(x[i,j,t] for i in livinglocations for j in testlocations for t in timeslots), GRB.EQUAL, Ttot)
+#m.addConstr(quicksum(x[i,j,t] for i in livinglocations for j in testlocations for t in timeslots), GRB.EQUAL, Ttot)
 #sum of all people from i that get tested must equal sum of all people in i
 for i in livinglocations:
     xtot.append(quicksum(x[i,j,t] for j in testlocations for t in timeslots))
@@ -190,3 +197,4 @@ for i in livinglocations:
     for j in testlocations:
         for t in timeslots:
             print( x[i,j,t].X, "people from livinglocation", Livinglocations[i], "go to testlocation", Testlocations[j], "during timeslot", Timeslots[t])
+
