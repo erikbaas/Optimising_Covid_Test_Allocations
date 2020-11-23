@@ -1,20 +1,8 @@
 #Objective4: includes fixed charge, penalty for far travelling, data from excel
 # people will be testes in their preferred timeslot or the one after that
 # =========================================================
-# objective statement
-# =========================================================
-#Minimise the distance traveled by people going to a Covid test facility (weight $\alpha$: 0.6)
-#Minimise the cost for the test- locations in the Netherlands (weight $1-\alpha$: 0.4)
-# min  Z = \alpha Z_{1} + (1-\alpha)Z_{2}
-# $Z_{1}$ = Minimisation of the travelling distance (km)
-# Z_{1} = \sum_{i=1}^{n}\sum_{j=1}^{m} c_{ij}x_{ij} + 1000\sum_{i=1}^n\sum_{j=1}^{m}b_{i,j}
-# Z_{2}$ = Minimisation of the fixed charge cost per opening test facility and the variable cost regarding needed testkits/employees
-# Z_{2} = c_{3}\sum_{j=1}^{n}x_{ij} +c_4\sum_{j=1}^{n}y_j
-
-# =========================================================
 # Importing packages
 # =========================================================
-
 from gurobipy import *
 from numpy import *
 from openpyxl import *
@@ -36,11 +24,6 @@ Livinglocations = ['Arnhem','Assen','Den Bosch', 'Den Haag', 'Groningen', 'Haarl
 livinglocations = range(len(Livinglocations))
 Timeslots = ['Monday','Tuesday','Wednesday', 'Thursday', 'Friday']
 timeslots = range(len(Timeslots))
-
-#distance data from location to location
-#distance1 = [[0, 20, 50], #travel cost from i to j and back c1
- #           [20, 0, 20],
- #           [20, 50, 0]]
 
 # =========================================================
 # Reading worksheets from xlsx file
@@ -276,19 +259,19 @@ livtim=[]
 #print(livtimepref)
 
 # location capacities
-loccapt = [[15, 40, 10, 0, 0],
-           [30, 10, 0, 0, 0],
-           [30, 40, 0, 0, 0],
-           [10, 0, 0, 0,0],
+loccapt = [[15, 40, 10, 10, 10],
+           [30, 10, 10, 10, 10],
+           [30, 40, 10, 10, 10],
+           [10, 10, 10, 10,10],
            [0, 10, 20, 30, 10],
-           [15, 40, 10, 0, 0],
-           [30, 10, 0, 0, 0],
-           [30, 40, 0, 0, 0],
-           [10, 0, 0, 0, 0],
+           [15, 40, 10, 10, 10],
+           [30, 10, 10, 10, 10],
+           [30, 40, 10, 10, 10],
+           [10, 10, 10, 10, 10],
            [0, 10, 20, 30, 10],
-           [10, 0, 0, 0, 0],
+           [10, 10, 10, 10, 10],
            [0, 10, 20, 30, 10]] # test location capacity per time slot t
-loccap = [90,80,0,0,0,0,0,0,0,0,0,0] # test location capacity total
+loccap = [40,40,40,40,40,40,40,40,40,40,40,40] # test location capacity total
 
 # big number M needed for penalty and fixed charge constraint
 M=10000
@@ -312,7 +295,7 @@ for j in testlocations:
             x[i,j,t] = m.addVar(obj = (+alpha*distance[i][j]+(1-alpha)*testcost),lb=0,vtype=GRB.INTEGER) # distance x x_ij
 for i in livinglocations:
     for t in timeslots:
-        z[i,t] = m.addVar(obj=+ 10, lb=0, vtype=GRB.BINARY)  # penalty for late test
+        z[i,t] = m.addVar(obj=+ 10*alpha, lb=0, vtype=GRB.BINARY)  # penalty for late test
 
 m.update()
 m.setObjective(m.getObjective(), GRB.MINIMIZE)  # The objective is to minimize travel distance+ delay + facility cost
