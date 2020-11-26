@@ -16,9 +16,10 @@ import sys
 # Data
 # =========================================================
 alpha = 0.5  # weight factor
-fixedcharge = 1000  # fixed charge to open up TL_j
+fixedcharge = 1664  # fixed charge to open up TL_j
 testcost = 100  # cost per testkit/employee
-minopen = 10  # min number of testees to open up a location
+minopen = 5  # min number of testees to open up a location
+
 # sets to determine ranges
 Testlocations = ['Arnhem', 'Assen', 'Den Bosch', 'Den Haag', 'Groningen', 'Haarlem', 'Leeuwarden', 'Lelystad',
                  'Maastricht', 'Middelburg', 'Utrecht', 'Zwolle']
@@ -263,23 +264,24 @@ livtimepref = [[liv1tim1, liv1tim2, liv1tim3, liv1tim4, liv1tim5, 0],
 livtim = []
 # print(livtimepref)
 
-# location capacities
-loccapt = [[15, 40, 10, 10, 10],
-           [30, 10, 10, 10, 10],
-           [30, 40, 10, 10, 10],
-           [10, 10, 10, 10, 10],
-           [0, 10, 20, 30, 10],
-           [15, 40, 10, 10, 10],
-           [30, 10, 10, 10, 10],
-           [30, 40, 10, 10, 10],
-           [10, 10, 10, 10, 10],
-           [0, 10, 20, 30, 10],
-           [10, 10, 10, 10, 10],
-           [0, 10, 20, 30, 10]]  # test location capacity per time slot t
-loccap = [40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40]  # test location capacity total
+# location capacities: 5 per day and 21 per week.
+loccapt = [[5, 5, 5, 5, 5],     # For test location 1
+           [5, 5, 5, 5, 5],     # For test location 2
+           [5, 5, 5, 5, 5],     # For test location 3
+           [5, 5, 5, 5, 5],     # For test location 4
+           [5, 5, 5, 5, 5],     # For test location 5
+           [5, 5, 5, 5, 5],
+           [5, 5, 5, 5, 5],
+           [5, 5, 5, 5, 5],
+           [5, 5, 5, 5, 5],
+           [5, 5, 5, 5, 5],
+           [5, 5, 5, 5, 5],
+           [5, 5, 5, 5, 5]]  # test location capacity per time slot t
+
+loccap = [21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21]  # Weekly test location capacity total. See excel.
 
 # big number M needed for penalty and fixed charge constraint
-M = 10000
+M = 99999
 
 # ==========================================================
 # Start modelling optimization problem
@@ -379,10 +381,11 @@ for i in livinglocations:
     for j in testlocations:
         result_array = np.append(result_array,[Livinglocations[i], Testlocations[j]])
         for t in timeslots:
-            print(x[i, j, t].X, "people living in", Livinglocations[i], "go to a test location in", Testlocations[j],
+            if x[i, j, t].X != 0: #ONLY print the travel routs which are not zero!
+                print(x[i, j, t].X, "people living in", Livinglocations[i], "go to a test location in", Testlocations[j],
                   "on", Timeslots[t], "to get tested")
             result_array = np.append(result_array,x[i, j, t].X)
 
 #Write to excel
-result_array = pd.DataFrame(np.reshape(result_array,(-1,7)),columns=['Living Location','Test Location','Monday','Tuesday','Wednesday','Thursday','Friday'])
+result_array = pd.DataFrame(np.reshape(result_array,(-1,7)),columns=['Living Location', 'Test Location', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'])
 result_array.to_excel('results.xlsx')
