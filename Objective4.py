@@ -249,20 +249,19 @@ for a in range(len(alltestees)):
     elif alltesteestime[a] == 5 and alltesteesloc[a] == 12:
         liv12tim5 += 1
 
-livtimepref = [[liv1tim1, liv1tim2, liv1tim3, liv1tim4, liv1tim5, 0],
-               [liv2tim1, liv2tim2, liv2tim3, liv2tim4, liv2tim5, 0],
-               [liv3tim1, liv3tim2, liv3tim3, liv3tim4, liv3tim5, 0],
-               [liv4tim1, liv4tim2, liv4tim3, liv4tim4, liv4tim5, 0],
-               [liv5tim1, liv5tim2, liv5tim3, liv5tim4, liv5tim5, 0],
-               [liv6tim1, liv6tim2, liv6tim3, liv6tim4, liv6tim5, 0],
-               [liv7tim1, liv7tim2, liv7tim3, liv7tim4, liv7tim5, 0],
-               [liv8tim1, liv8tim2, liv8tim3, liv8tim4, liv8tim5, 0],
-               [liv9tim1, liv9tim2, liv9tim3, liv9tim4, liv9tim5, 0],
-               [liv10tim1, liv10tim2, liv10tim3, liv10tim4, liv10tim5, 0],
-               [liv11tim1, liv11tim2, liv11tim3, liv11tim4, liv11tim5, 0],
-               [liv12tim1, liv12tim2, liv12tim3, liv12tim4, liv12tim5, 0]]
-livtim = []
-# print(livtimepref)
+livtimepref = [[liv1tim1, liv1tim2, liv1tim3, liv1tim4, liv1tim5],
+               [liv2tim1, liv2tim2, liv2tim3, liv2tim4, liv2tim5],
+               [liv3tim1, liv3tim2, liv3tim3, liv3tim4, liv3tim5],
+               [liv4tim1, liv4tim2, liv4tim3, liv4tim4, liv4tim5],
+               [liv5tim1, liv5tim2, liv5tim3, liv5tim4, liv5tim5],
+               [liv6tim1, liv6tim2, liv6tim3, liv6tim4, liv6tim5],
+               [liv7tim1, liv7tim2, liv7tim3, liv7tim4, liv7tim5],
+               [liv8tim1, liv8tim2, liv8tim3, liv8tim4, liv8tim5],
+               [liv9tim1, liv9tim2, liv9tim3, liv9tim4, liv9tim5],
+               [liv10tim1, liv10tim2, liv10tim3, liv10tim4, liv10tim5],
+               [liv11tim1, liv11tim2, liv11tim3, liv11tim4, liv11tim5],
+               [liv12tim1, liv12tim2, liv12tim3, liv12tim4, liv12tim5]]
+print(livtimepref)
 
 # location capacities: 5 per day and 21 per week.
 loccapt = [[5, 5, 5, 5, 5],     # For test location 1
@@ -286,13 +285,13 @@ M = 99999
 # ==========================================================
 # Start modelling optimization problem
 # ==========================================================
-m = Model('objective1')
+m = Model('objective')
 
 # decision variables
 x = {}  # number of testees travelling from i to j during t
 b = {}  # binary penalty travel distance
 y = {}  # binary fixed charge cost
-z = {}  # penalty for late test
+#z = {}  # penalty for late test
 
 for j in testlocations:
     y[j] = m.addVar(obj=+(1 - alpha) * fixedcharge, lb=0, vtype=GRB.BINARY)  # binary fixed charge cost
@@ -301,9 +300,9 @@ for j in testlocations:
         for t in timeslots:
             x[i, j, t] = m.addVar(obj=(+alpha * distance[i][j] + (1 - alpha) * testcost), lb=0,
                                   vtype=GRB.INTEGER)  # distance x x_ij
-for i in livinglocations:
-    for t in timeslots:
-        z[i, t] = m.addVar(obj=+ 10 * alpha, lb=0, vtype=GRB.BINARY)  # penalty for late test
+#for i in livinglocations:
+ #   for t in timeslots:
+  #      z[i, t] = m.addVar(obj=+ 10 * alpha, lb=0, vtype=GRB.BINARY)  # penalty for late test
 
 m.update()
 m.setObjective(m.getObjective(), GRB.MINIMIZE)  # The objective is to minimize travel distance+ delay + facility cost
@@ -318,22 +317,22 @@ for j in testlocations:
     for t in timeslots:
         # k1 number of testees per timeslot
         m.addConstr(quicksum(x[i, j, t] for i in livinglocations), GRB.LESS_EQUAL, loccapt[j][t],
-                    "teslocation timeslot capacity")
+                    "test location timeslot capacity")
     for i in livinglocations:
         # k6 soft constraint
         m.addConstr(-M * b[i, j] + distance[i][j] * quicksum(x[i, j, t] for t in timeslots), GRB.LESS_EQUAL,
                     10 * quicksum(x[i, j, t] for t in timeslots), "soft distance constraint")
 # k4 people wait max so long
-for t in timeslots:
-    for i in livinglocations:
+for i in livinglocations:
+    for t in range(1,len(Timeslots)):
         # make sure they can only be added to their time slot or the one after
-        m.addConstr(quicksum(x[i, j, t] for j in testlocations), GRB.LESS_EQUAL,
-                    livtimepref[i][t] + livtimepref[i][t - 1], "part 1 timeslots: only 1 slot delay")
-        # add penalty for non preferred time slot
-        m.addConstr(quicksum(x[i, j, t] for j in testlocations), GRB.GREATER_EQUAL,
-                    livtimepref[i][t] - z[i, t] * (livtimepref[i][t] - quicksum(x[i, j, t] for j in testlocations)),
-                    "part 2 timeslots: penalty for delay")
+        m.addConstr(quicksum(x[i, j, t] for j in testlocations), GRB.LESS_EQUAL, livtimepref[i][t]+ (quicksum(x[i,j,t-1] for j in testlocations)-livtimepref[i][t-1]), "part 1 timeslots: only 1 slot delay")
 
+    if t ==1:
+        # last day can't be delayed
+        m.addConstr(quicksum(x[i, j, t] for j in testlocations), GRB.LESS_EQUAL, livtimepref[i][t],
+                    "part 2 timeslots: first day")
+        # add penalty for non preferred time slot?
 # sum of all people with symptoms must equal all people that get tested
 # m.addConstr(quicksum(x[i,j,t] for i in livinglocations for j in testlocations for t in timeslots), GRB.EQUAL, Ttot)
 # sum of all people from i that get tested must equal sum of all people in i
