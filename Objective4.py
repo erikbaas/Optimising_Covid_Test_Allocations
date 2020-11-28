@@ -63,13 +63,13 @@ livloc12 = np.count_nonzero(alltesteesloc == 12)
 #            livloc12]  # testees at loc i total
 
 # Initial small data version, replace later^
-testees = [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
+testees = [12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
 
 # total number of testees:
 Ttot = len(alltestees)
 
 #Now, adjust manually, for the small data set:
-Ttot = 9
+Ttot = 12
 
 xtot = []
 
@@ -274,7 +274,7 @@ for a in range(len(alltestees)):
 
 # Small data version, delete later
                 # monday, tuesday, wednesday #etc
-livtimepref = [[0, 9, 0, 0, 0], # Assen
+livtimepref = [[3, 9, 0, 0, 0], # Assen
                 [0, 0, 0, 0, 0], # Arnhem
                 [0, 0, 0, 0, 0], # etc
                 [0, 0, 0, 0, 0],
@@ -309,6 +309,7 @@ M = 99999
 
 # Penalty value
 PV_Delay = 5
+PV_Distance =800
 
 # ==========================================================
 # Start modelling optimization problem
@@ -325,12 +326,12 @@ O = {}  # Surplus
 """ ---------------------------------- OBJECTIVE FUNCTION -------------------------------------- """
 
 for j in testlocations:
-    y[j] = m.addVar(obj=+(1 - alpha) * fixedcharge, lb=0, vtype=GRB.BINARY)  # Binary fixed charge cost
     for i in livinglocations:
-        b[i, j] = m.addVar(obj=+alpha * 150, lb=0, vtype=GRB.BINARY)  # Penalty cost for large distance
+        b[i, j] = m.addVar(obj=+alpha * PV_Distance, lb=0, vtype=GRB.BINARY)  # Penalty cost for large distance
         for t in timeslots:
+            y[j, t] = m.addVar(obj=+(1 - alpha) * fixedcharge, lb=0, vtype=GRB.BINARY)  # Binary fixed charge cost
             x[i, j, t] = m.addVar(obj=(+alpha * distance[i][j] + (1 - alpha) * testcost), lb=0,
-                                  vtype=GRB.INTEGER)  # distance x x_ij
+                                  vtype=GRB.INTEGER)  # Penalty for distance x x_ij
             O[i, j, t] = m.addVar(obj=(+alpha * PV_Delay), lb=0,  # Penalty for delay
                                   vtype=GRB.INTEGER)
 
@@ -348,13 +349,13 @@ for j in testlocations:
         # k1 number of testees per day
         m.addConstr(quicksum(x[i, j, t] for i in livinglocations), GRB.LESS_EQUAL, loccapt[j][t], "Test location timeslot capacity per day")
         # k3 number of testees required to open up test location
-        m.addConstr((quicksum(x[i, j, t] for i in livinglocations) - M * y[j]), GRB.LESS_EQUAL,
+        m.addConstr((quicksum(x[i, j, t] for i in livinglocations) - M * y[j,t]), GRB.LESS_EQUAL,
                     minopen, "Minimum people required to open up test location for a day")
 
     for i in livinglocations:
         # k6 soft constraint
         m.addConstr(-M * b[i, j] + distance[i][j] * quicksum(x[i, j, t] for t in timeslots), GRB.LESS_EQUAL,
-                    5 * quicksum(x[i, j, t] for t in timeslots), "soft distance constraint")
+                    25 * quicksum(x[i, j, t] for t in timeslots), "soft distance constraint")
 
 # K 90: Set delay penalty per amount of people not placed on a day
 for j in testlocations:
@@ -430,3 +431,4 @@ for i in livinglocations:
 # Write to excel
 result_array = pd.DataFrame(np.reshape(result_array,(-1,7)),columns=['Living Location', 'Test Location', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'])
 result_array.to_excel('results.xlsx')
+
