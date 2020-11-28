@@ -63,13 +63,13 @@ livloc12 = np.count_nonzero(alltesteesloc == 12)
 #            livloc12]  # testees at loc i total
 
 # Initial small data version, replace later^
-testees = [12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
+testees = [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
 
 # total number of testees:
 Ttot = len(alltestees)
 
 #Now, adjust manually, for the small data set:
-Ttot = 12
+Ttot = 8
 
 xtot = []
 
@@ -274,7 +274,7 @@ for a in range(len(alltestees)):
 
 # Small data version, delete later
                 # monday, tuesday, wednesday #etc
-livtimepref = [[3, 9, 0, 0, 0], # Assen
+livtimepref = [[0, 8, 0, 0, 0], # Assen
                 [0, 0, 0, 0, 0], # Arnhem
                 [0, 0, 0, 0, 0], # etc
                 [0, 0, 0, 0, 0],
@@ -331,9 +331,10 @@ for j in testlocations:
         for t in timeslots:
             y[j, t] = m.addVar(obj=+(1 - alpha) * fixedcharge, lb=0, vtype=GRB.BINARY)  # Binary fixed charge cost
             x[i, j, t] = m.addVar(obj=(+alpha * distance[i][j] + (1 - alpha) * testcost), lb=0,
-                                  vtype=GRB.INTEGER)  # Penalty for distance x x_ij
+                                  vtype=GRB.INTEGER)  # distance x x_ij
             O[i, j, t] = m.addVar(obj=(+alpha * PV_Delay), lb=0,  # Penalty for delay
                                   vtype=GRB.INTEGER)
+
 
 m.update()
 m.setObjective(m.getObjective(), GRB.MINIMIZE)  # The objective is to minimize travel distance + delay + facility cost
@@ -349,7 +350,7 @@ for j in testlocations:
         # k1 number of testees per day
         m.addConstr(quicksum(x[i, j, t] for i in livinglocations), GRB.LESS_EQUAL, loccapt[j][t], "Test location timeslot capacity per day")
         # k3 number of testees required to open up test location
-        m.addConstr((quicksum(x[i, j, t] for i in livinglocations) - M * y[j,t]), GRB.LESS_EQUAL,
+        m.addConstr((quicksum(x[i, j, t] for i in livinglocations) + M * y[j,t]), GRB.GREATER_EQUAL,
                     minopen, "Minimum people required to open up test location for a day")
 
     for i in livinglocations:
