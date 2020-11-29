@@ -20,7 +20,7 @@ import sys
 alpha = 0.5  # weight factor
 fixedcharge = 1600  # fixed charge to open up TL_j
 testcost = 200  # cost per testkit/employee
-minopen = 2  # min number of testees to open up a location
+#minopen = 2  # min number of testees to open up a location
 
 # sets to determine ranges
 Testlocations = ['Arnhem', 'Assen', 'Den Bosch', 'Den Haag', 'Groningen', 'Haarlem', 'Leeuwarden', 'Lelystad',
@@ -58,18 +58,18 @@ livloc10 = np.count_nonzero(alltesteesloc == 10)
 livloc11 = np.count_nonzero(alltesteesloc == 11)
 livloc12 = np.count_nonzero(alltesteesloc == 12)
 
-# Final big data version
-# testees = [livloc1, livloc2, livloc3, livloc4, livloc5, livloc6, livloc7, livloc8, livloc9, livloc10, livloc11,
-#            livloc12]  # testees at loc i total
+#Final big data version
+testees = [livloc1, livloc2, livloc3, livloc4, livloc5, livloc6, livloc7, livloc8, livloc9, livloc10, livloc11,
+           livloc12]  # testees at loc i total
 
 # Initial small data version, replace later^
-testees = [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
+# testees = [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
+#
+# # total number of testees:
+# Ttot = len(alltestees)
 
-# total number of testees:
-Ttot = len(alltestees)
-
-#Now, adjust manually, for the small data set:
-Ttot = 9999999999
+# #Now, adjust manually, for the small data set:
+# Ttot = 9999999999
 
 xtot = []
 
@@ -259,33 +259,33 @@ for a in range(len(alltestees)):
         liv12tim5 += 1
 
 # Big data version, use later
-# livtimepref = [[liv1tim1, liv1tim2, liv1tim3, liv1tim4, liv1tim5],
-#                [liv2tim1, liv2tim2, liv2tim3, liv2tim4, liv2tim5],
-#                [liv3tim1, liv3tim2, liv3tim3, liv3tim4, liv3tim5],
-#                [liv4tim1, liv4tim2, liv4tim3, liv4tim4, liv4tim5],
-#                [liv5tim1, liv5tim2, liv5tim3, liv5tim4, liv5tim5],
-#                [liv6tim1, liv6tim2, liv6tim3, liv6tim4, liv6tim5],
-#                [liv7tim1, liv7tim2, liv7tim3, liv7tim4, liv7tim5],
-#                [liv8tim1, liv8tim2, liv8tim3, liv8tim4, liv8tim5],
-#                [liv9tim1, liv9tim2, liv9tim3, liv9tim4, liv9tim5],
-#                [liv10tim1, liv10tim2, liv10tim3, liv10tim4, liv10tim5],
-#                [liv11tim1, liv11tim2, liv11tim3, liv11tim4, liv11tim5],
-#                [liv12tim1, liv12tim2, liv12tim3, liv12tim4, liv12tim5]]
-
-# Small data version, delete later
-                # monday, tuesday, wednesday #etc
-livtimepref = [[0, 8, 0, 0, 0], # Assen
-                [0, 0, 0, 0, 0], # Arnhem
-                [0, 0, 0, 0, 0], # etc
-                [0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0]]
+livtimepref = [[liv1tim1, liv1tim2, liv1tim3, liv1tim4, liv1tim5],
+               [liv2tim1, liv2tim2, liv2tim3, liv2tim4, liv2tim5],
+               [liv3tim1, liv3tim2, liv3tim3, liv3tim4, liv3tim5],
+               [liv4tim1, liv4tim2, liv4tim3, liv4tim4, liv4tim5],
+               [liv5tim1, liv5tim2, liv5tim3, liv5tim4, liv5tim5],
+               [liv6tim1, liv6tim2, liv6tim3, liv6tim4, liv6tim5],
+               [liv7tim1, liv7tim2, liv7tim3, liv7tim4, liv7tim5],
+               [liv8tim1, liv8tim2, liv8tim3, liv8tim4, liv8tim5],
+               [liv9tim1, liv9tim2, liv9tim3, liv9tim4, liv9tim5],
+               [liv10tim1, liv10tim2, liv10tim3, liv10tim4, liv10tim5],
+               [liv11tim1, liv11tim2, liv11tim3, liv11tim4, liv11tim5],
+               [liv12tim1, liv12tim2, liv12tim3, liv12tim4, liv12tim5]]
+print(livtimepref)
+# # Small data version, delete later
+#                 # monday, tuesday, wednesday #etc
+# livtimepref = [[0, 8, 0, 0, 0], # Assen
+#                 [0, 0, 0, 0, 0], # Arnhem
+#                 [0, 0, 0, 0, 0], # etc
+#                 [0, 0, 0, 0, 0],
+#                 [0, 0, 0, 0, 0],
+#                 [0, 0, 0, 0, 0],
+#                 [0, 0, 0, 0, 0],
+#                 [0, 0, 0, 0, 0],
+#                 [0, 0, 0, 0, 0],
+#                 [0, 0, 0, 0, 0],
+#                 [0, 0, 0, 0, 0],
+#                 [0, 0, 0, 0, 0]]
 
 # Capacity per day per location [monday, tuesday, wednesday, thursday, friday]
 loccapt = [[5, 5, 5, 5, 5],     # For test location 1
@@ -308,9 +308,9 @@ loccap = [21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21]
 M = 99999
 
 # Penalty value
-treshold_far_km = 2  # See report for deduction
-PV_Delay = 99999999  # See report for deduction
-PV_Distance = 140  # See report for deduction
+treshold_far_km = 60  # See report for deduction
+PV_Delay = 40  # See report for deduction
+PV_Distance = 60  # See report for deduction
 
 # ==========================================================
 # Start modelling optimization problem
@@ -333,7 +333,7 @@ for t in timeslots:
             I[i, j, t] = m.addVar(obj=(+alpha * PV_Distance), lb=0, vtype=GRB.INTEGER)  # Penalty cost for large distance
             x[i, j, t] = m.addVar(obj=(+alpha * distance[i][j] + (1 - alpha) * testcost), lb=0,  # Distance x x_ij
                                   vtype=GRB.INTEGER)
-            O[i, j, t] = m.addVar(obj=(+alpha * PV_Delay), lb=0,  # Penalty for delay
+            O[i, j,t] = m.addVar(obj=(+alpha * PV_Delay), lb=0,  # Penalty for delay
                                   vtype=GRB.INTEGER)
 
 m.update()
@@ -368,7 +368,7 @@ for i in livinglocations:
         else:  # Other days, include surplus of day before AND all before that
             m.addConstr(
                 livtimepref[i][t] - quicksum(x[i, j, t] for j in testlocations)
-                + O[i, j, t - 1] - O[i, j, t], GRB.LESS_EQUAL, 0, "Delay constraint for remainder days")
+                + quicksum(O[i,j, t - 1] for j in testlocations) - quicksum(O[i,j, t] for j in testlocations), GRB.LESS_EQUAL, 0, "Delay constraint for remainder days")
 
 # K5 Penalise far travels (soft constraint)
 for i in livinglocations:
