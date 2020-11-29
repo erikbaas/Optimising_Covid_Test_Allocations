@@ -1,5 +1,3 @@
-# Objective4: includes fixed charge, penalty for far travelling, data from excel
-# people will be testes in their preferred timeslot or the one after that
 # =========================================================
 # Importing packages
 # =========================================================
@@ -11,16 +9,10 @@ import pandas as pd
 import numpy as np
 import sys
 # np.set_printoptions(threshold=sys.maxsize)
-
 """ ---------------------------------- LOADING IN DATA FROM DATABASE -------------------------------------- """
-
-# =========================================================
-# Data
-# =========================================================
 alpha = 0.5  # weight factor
 fixedcharge = 1600  # fixed charge to open up TL_j
 testcost = 200  # cost per testkit/employee
-#minopen = 2  # min number of testees to open up a location
 
 # sets to determine ranges
 Testlocations = ['Arnhem', 'Assen', 'Den Bosch', 'Den Haag', 'Groningen', 'Haarlem', 'Leeuwarden', 'Lelystad',
@@ -61,16 +53,6 @@ livloc12 = np.count_nonzero(alltesteesloc == 12)
 #Final big data version
 testees = [livloc1, livloc2, livloc3, livloc4, livloc5, livloc6, livloc7, livloc8, livloc9, livloc10, livloc11,
            livloc12]  # testees at loc i total
-
-# Initial small data version, replace later^
-# testees = [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
-#
-# # total number of testees:
-# Ttot = len(alltestees)
-
-# #Now, adjust manually, for the small data set:
-# Ttot = 9999999999
-
 xtot = []
 
 # preferences for time
@@ -257,8 +239,6 @@ for a in range(len(alltestees)):
         liv12tim4 += 1
     elif alltesteestime[a] == 5 and alltesteesloc[a] == 12:
         liv12tim5 += 1
-
-# Big data version, use later
 livtimepref = [[liv1tim1, liv1tim2, liv1tim3, liv1tim4, liv1tim5],
                [liv2tim1, liv2tim2, liv2tim3, liv2tim4, liv2tim5],
                [liv3tim1, liv3tim2, liv3tim3, liv3tim4, liv3tim5],
@@ -271,21 +251,6 @@ livtimepref = [[liv1tim1, liv1tim2, liv1tim3, liv1tim4, liv1tim5],
                [liv10tim1, liv10tim2, liv10tim3, liv10tim4, liv10tim5],
                [liv11tim1, liv11tim2, liv11tim3, liv11tim4, liv11tim5],
                [liv12tim1, liv12tim2, liv12tim3, liv12tim4, liv12tim5]]
-print(livtimepref)
-# # Small data version, delete later
-#                 # monday, tuesday, wednesday #etc
-# livtimepref = [[0, 8, 0, 0, 0], # Assen
-#                 [0, 0, 0, 0, 0], # Arnhem
-#                 [0, 0, 0, 0, 0], # etc
-#                 [0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0],
-#                 [0, 0, 0, 0, 0]]
 
 # Capacity per day per location [monday, tuesday, wednesday, thursday, friday]
 loccapt = [[5, 5, 5, 5, 5],     # For test location 1
@@ -299,18 +264,17 @@ loccapt = [[5, 5, 5, 5, 5],     # For test location 1
            [5, 5, 5, 5, 5],
            [5, 5, 5, 5, 5],
            [5, 5, 5, 5, 5],
-           [5, 5, 5, 5, 5]]  # test location capacity per time slot t
+           [5, 5, 5, 5, 5]]
 
 # Capacity per week per location [Assen, Arnhem, etc.]
 loccap = [21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21]
 
 # Big number M needed for penalty and fixed charge constraint
 M = 99999
-
 # Penalty value
-treshold_far_km = 60  # See report for deduction
-PV_Delay = 40  # See report for deduction
-PV_Distance = 60  # See report for deduction
+treshold_far_km = 40 # See report for deduction
+PV_Delay = 40 # See report for deduction
+PV_Distance = 60# See report for deduction
 
 # ==========================================================
 # Start modelling optimization problem
@@ -323,9 +287,7 @@ I = {}  # Integer penalty travel distance
 y = {}  # binary fixed charge cost
 O = {}  # Surplus
 
-
 """ ---------------------------------- OBJECTIVE FUNCTION -------------------------------------- """
-
 for t in timeslots:
     for j in testlocations:
         y[j, t] = m.addVar(obj=+(1 - alpha) * fixedcharge, lb=0, vtype=GRB.BINARY)  # Binary fixed charge cost
@@ -339,9 +301,7 @@ for t in timeslots:
 m.update()
 m.setObjective(m.getObjective(), GRB.MINIMIZE)  # The objective is to minimize travel cost + delay cost + facility cost
 
-
 """ ---------------------------------- CONSTRAINTS -------------------------------------- """
-
 # k1: All testees must get tested
 for i in livinglocations:
     xtot.append(quicksum(x[i, j, t] for j in testlocations for t in timeslots))
@@ -351,11 +311,6 @@ for j in testlocations:
     for t in timeslots:
         # k2 Max capacity per day per location (includes fixed charge constraint)
         m.addConstr(quicksum(x[i, j, t] for i in livinglocations), GRB.LESS_EQUAL, y[j,t] * loccapt[j][t], "Max capacity per day per location")
-
-        # # k999 number of testees required to open up test location fixed charge
-        # m.addConstr((quicksum(x[i, j, t] for i in livinglocations) - M * y[j,t]), GRB.LESS_EQUAL,
-        #                       minopen, "Minimum people required to open up test location for a day")
-
     # k3 Maximum capacity per week per location (= nr of testkits)
     m.addConstr(quicksum(x[i, j, t] for i in livinglocations for t in timeslots), GRB.LESS_EQUAL, loccap[j], "Testlocation capacity per week")
 
@@ -376,15 +331,11 @@ for i in livinglocations:
         for t in timeslots:
             m.addConstr( (treshold_far_km - distance[i][j]) * I[i, j, t] + distance[i][j] * x[i, j, t], GRB.LESS_EQUAL,
                         treshold_far_km * x[i, j, t], "Penalise far travels")
-
-# # Sum of all people with symptoms must equal all people that get tested
-# m.addConstr(quicksum(x[i,j,t] for i in livinglocations for j in testlocations for t in timeslots), GRB.EQUAL, Ttot)
-
 m.update()
 # ==========================================================
 # start optimising
 # ==========================================================
-# m.write('test.lp')
+#m.write('test.lp')
 # Set time constraint for optimization (5minutes)
 # m.setParam('TimeLimit', 1 * 60)
 # m.setParam('MIPgap', 0.009)
@@ -423,12 +374,6 @@ for i in livinglocations:
             if x[i, j, t].X != 0: # ONLY print the travel routs which are not zero!
                 print(x[i, j, t].X, "people living in", Livinglocations[i], "go to a test location in", Testlocations[j],
                   "on", Timeslots[t], "to get tested")
-
-        # for t in range(1,len(Timeslots)):
-        #     print(O[i, j, t].X, "of overschot from people living in", Livinglocations[i], "go to a test location in",
-        #               Testlocations[j],
-        #               "on", Timeslots[t], "to get tested")
-
 
             result_array = np.append(result_array,x[i, j, t].X)
 
