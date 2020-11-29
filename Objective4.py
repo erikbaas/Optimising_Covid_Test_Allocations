@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import sys
 # np.set_printoptions(threshold=sys.maxsize)
+
 """ ---------------------------------- LOADING IN DATA FROM DATABASE -------------------------------------- """
 alpha = 0.5  # weight factor
 fixedcharge = 1600  # fixed charge to open up TL_j
