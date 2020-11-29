@@ -63,7 +63,7 @@ livloc12 = np.count_nonzero(alltesteesloc == 12)
 #            livloc12]  # testees at loc i total
 
 # Initial small data version, replace later^
-testees = [18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
+testees = [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # testees at loc i total
 
 # total number of testees:
 Ttot = len(alltestees)
@@ -274,7 +274,7 @@ for a in range(len(alltestees)):
 
 # Small data version, delete later
                 # monday, tuesday, wednesday #etc
-livtimepref = [[0, 18, 0, 0, 0], # Assen
+livtimepref = [[0, 8, 0, 0, 0], # Assen
                 [0, 0, 0, 0, 0], # Arnhem
                 [0, 0, 0, 0, 0], # etc
                 [0, 0, 0, 0, 0],
@@ -308,9 +308,9 @@ loccap = [21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21]
 M = 99999
 
 # Penalty value
-treshold_far_km = 60  # See report for deduction
-PV_Delay = 100  # See report for deduction
-PV_Distance = 100  # See report for deduction
+treshold_far_km = 2  # See report for deduction
+PV_Delay = 99999999  # See report for deduction
+PV_Distance = 140  # See report for deduction
 
 # ==========================================================
 # Start modelling optimization problem
@@ -319,7 +319,7 @@ m = Model('objective')
 
 # decision variables
 x = {}  # number of testees travelling from i to j during t
-b = {}  # binary penalty travel distance
+I = {}  # Integer penalty travel distance
 y = {}  # binary fixed charge cost
 O = {}  # Surplus
 
@@ -330,7 +330,7 @@ for t in timeslots:
     for j in testlocations:
         y[j, t] = m.addVar(obj=+(1 - alpha) * fixedcharge, lb=0, vtype=GRB.BINARY)  # Binary fixed charge cost
         for i in livinglocations:
-            b[i, j, t] = m.addVar(obj=+alpha * PV_Distance, lb=0, vtype=GRB.BINARY)  # Penalty cost for large distance
+            I[i, j, t] = m.addVar(obj=(+alpha * PV_Distance), lb=0, vtype=GRB.INTEGER)  # Penalty cost for large distance
             x[i, j, t] = m.addVar(obj=(+alpha * distance[i][j] + (1 - alpha) * testcost), lb=0,  # Distance x x_ij
                                   vtype=GRB.INTEGER)
             O[i, j, t] = m.addVar(obj=(+alpha * PV_Delay), lb=0,  # Penalty for delay
@@ -365,20 +365,17 @@ for i in livinglocations:
         if t == 0:  # Monday
             m.addConstr(livtimepref[i][t] - (quicksum(x[i, j, t] for j in testlocations)), GRB.GREATER_EQUAL, 0,
                         "Delay constraint for the first day")
-        elif t == 1:  # Tuesday: include overschot van i-1
-            m.addConstr(livtimepref[i][t - 1] - (quicksum(x[i, j, t - 1] for j in testlocations)) - O[i, j, t],
-                        GRB.LESS_EQUAL, 0, "Delay constraint for the second day")
         else:  # Other days, include surplus of day before AND all before that
             m.addConstr(
-                livtimepref[i][t - 1] - (quicksum(x[i, j, t - 1] for j in testlocations)) + O[i, j, t - 1] - O[
-                    i, j, t], GRB.LESS_EQUAL, 0, "Delay constraint for remainder days")
+                livtimepref[i][t] - quicksum(x[i, j, t] for j in testlocations)
+                + O[i, j, t - 1] - O[i, j, t], GRB.LESS_EQUAL, 0, "Delay constraint for remainder days")
 
 # K5 Penalise far travels (soft constraint)
 for i in livinglocations:
-    for j in livinglocations:
+    for j in testlocations:
         for t in timeslots:
-            m.addConstr(-M * b[i, j, t] + distance[i][j] * x[i, j, t], GRB.LESS_EQUAL,
-                        treshold_far_km * x[i, j, t], "soft distance constraint")
+            m.addConstr( (treshold_far_km - distance[i][j]) * I[i, j, t] + distance[i][j] * x[i, j, t], GRB.LESS_EQUAL,
+                        treshold_far_km * x[i, j, t], "Penalise far travels")
 
 # # Sum of all people with symptoms must equal all people that get tested
 # m.addConstr(quicksum(x[i,j,t] for i in livinglocations for j in testlocations for t in timeslots), GRB.EQUAL, Ttot)
